@@ -1,0 +1,356 @@
+:root {
+    --bg-color: #000000;
+    --text-primary: #ffffff;
+    --text-red: #ff0000;
+    --text-yellow: #ffff00;
+    --text-cyan: #00f5ff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Press Start 2P', cursive, Arial;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Auth / Login Page - Matches 登入.png */
+.auth-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    gap: 2rem;
+}
+
+.auth-title {
+    color: var(--text-red);
+    font-size: 2rem;
+    margin-bottom: 3rem;
+}
+
+.auth-form-row {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+    width: 600px;
+}
+
+.auth-label {
+    width: 150px;
+    font-size: 1.2rem;
+}
+
+.auth-input-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-grow: 1;
+}
+
+.auth-input {
+    background: #c0c0c0;
+    border: none;
+    padding: 0.5rem;
+    width: 250px;
+    height: 35px;
+    color: #000;
+    font-size: 1rem;
+}
+
+.auth-input:focus {
+    background: #808080;
+    outline: none;
+}
+
+.auth-hint {
+    color: var(--text-red);
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.auth-actions {
+    display: flex;
+    gap: 4rem;
+    margin-top: 2rem;
+}
+
+.auth-btn-regist {
+    color: var(--text-cyan);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+}
+
+.auth-btn-login {
+    color: var(--text-yellow);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+}
+
+/* Room Selection - Matches 首頁.png */
+.room-screen {
+    padding: 2rem;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.room-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.leader-panel {
+    width: 480px;
+}
+
+.leader-title {
+    margin-bottom: 2rem;
+    font-size: 2.2rem;
+    white-space: nowrap;
+}
+
+.leader-headers {
+    display: flex;
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+}
+
+.leader-item {
+    display: flex;
+    margin-bottom: 1.2rem;
+    align-items: center;
+    font-size: 1.5rem;
+}
+
+.player-panel {
+    text-align: right;
+    width: 350px;
+    font-size: 1.4rem;
+}
+
+.version-text {
+    color: var(--text-red);
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.player-name-val {
+    color: var(--text-cyan);
+    margin-top: 0.8rem;
+}
+
+.room-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5rem;
+    /* Push up slightly */
+}
+
+.choose-room-title {
+    font-size: 2.5rem;
+    margin-bottom: 4rem;
+}
+
+.room-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 100px);
+    gap: 2rem;
+    text-align: center;
+}
+
+.room-num {
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.room-footer {
+    display: flex;
+    justify-content: center;
+    gap: 5rem;
+    padding: 2rem;
+}
+
+.footer-btn-settings {
+    color: var(--text-cyan);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+}
+
+.footer-btn-single {
+    color: var(--text-yellow);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+}
+
+.footer-btn-logout {
+    color: var(--text-red);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+}
+
+/* Game Board - Matches 多人連線_game.png */
+.game-screen {
+    height: 100vh;
+    width: 100vw;
+    background-image: url('/img_multi/bg1.png');
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.game-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 0;
+}
+
+.game-layout {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 2rem;
+    width: 90%;
+    justify-content: space-around;
+}
+
+.player-area {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.cur-player-name {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.stats-side {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 80px;
+}
+
+.stat-box {
+    text-align: left;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #fff;
+    margin-bottom: 0.3rem;
+}
+
+.stat-value {
+    font-size: 1rem;
+}
+
+.canvas-container {
+    background: #000;
+    border: 2px solid #555;
+    padding: 2px;
+}
+
+canvas {
+    display: block;
+}
+
+.center-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    padding-top: 20px;
+}
+
+.center-group {
+    text-align: center;
+}
+
+.center-label {
+    font-size: 0.8rem;
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.center-value {
+    font-size: 1.2rem;
+}
+
+/* Global / Reuse */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #000;
+    border: 3px solid #fff;
+    padding: 2rem;
+    max-width: 800px;
+}
+
+.game-over-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.board-overlay {
+    position: absolute;
+    width: 250px;
+    height: 500px;
+    top: -480px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-over-text {
+    font-family: 'Press Start 2P', cursive;
+    text-shadow: 4px 4px #000;
+}
+
+.countdown-text {
+    font-family: 'Press Start 2P', cursive;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+}
