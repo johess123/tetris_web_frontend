@@ -88,7 +88,7 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
     const collide = useCallback((coords, pos, grid) => {
         for (let coord of coords) {
             const px = coord[0] + pos.x, py = coord[1] + pos.y;
-            if (px < 0 || px >= GRID_WIDTH || py >= GRID_HEIGHT || py < 0 || (py >= 0 && grid[py][px] !== 0)) return true;
+            if (px < 0 || px >= GRID_WIDTH || py >= GRID_HEIGHT || (py >= 0 && grid[py][px] !== 0)) return true;
         }
         return false;
     }, []);
@@ -129,6 +129,7 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
     const drawBoard = (canvasRef, data) => {
         if (!canvasRef.current) return;
         const ctx = canvasRef.current.getContext('2d');
+        const settings = JSON.parse(localStorage.getItem('tetris_settings') || '{}');
 
         if (data.level % 10 === 9 && grayBg.current && grayBg.current.complete) {
             ctx.drawImage(grayBg.current, 0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -151,8 +152,17 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
         for (let i = 0; i <= GRID_WIDTH; i++) { ctx.beginPath(); ctx.moveTo(i * BLOCK_SIZE, 0); ctx.lineTo(i * BLOCK_SIZE, GRID_HEIGHT * BLOCK_SIZE); ctx.stroke(); }
         for (let i = 0; i <= GRID_HEIGHT; i++) { ctx.beginPath(); ctx.moveTo(0, i * BLOCK_SIZE); ctx.lineTo(GRID_WIDTH * BLOCK_SIZE, i * BLOCK_SIZE); ctx.stroke(); }
         drawGrid(ctx, data.grid, data.level, data.clearingLines, data.clearingPhase, data.flashActive, data.flashFrameCounter);
+
         if (!data.isGameOver && !data.flashActive && data.clearingPhase === -1 && data.blockType !== undefined && (data.startWait === undefined || data.startWait <= 0)) {
             const coords = BLOCKS_ROTATIONS[data.blockType].rotations[data.rotationIndex];
+
+            // Preview / Ghost Piece
+            if (settings.show_preview !== '0') {
+                let ghostY = data.pos.y;
+                while (!collide(coords, { x: data.pos.x, y: ghostY + 1 }, data.grid)) ghostY++;
+                coords.forEach(c => drawCell(ctx, c[0] + data.pos.x, c[1] + ghostY, data.blockType + 1, data.level, BLOCK_SIZE, true));
+            }
+
             coords.forEach(c => drawCell(ctx, c[0] + data.pos.x, c[1] + data.pos.y, data.blockType + 1, data.level));
         }
         if (data.isGameOver) {
@@ -179,6 +189,7 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
         const g = myGameRef.current; if (g.seeds.length === 0 || g.gameOverSoundTriggered) return;
         g.blockType = g.blockType === undefined ? g.seeds[g.seedIndex++ % g.seeds.length] % 7 : g.nextBlockType; g.nextBlockType = g.seeds[g.seedIndex++ % g.seeds.length] % 7;
         g.pos = { x: 5, y: 0 }; g.rotationIndex = 0; g.drt = g.blockType === 0 ? 0 : g.drt + 1;
+        g.downCounter = 0; g.dropCounter = 0;
         if (collide(BLOCKS_ROTATIONS[g.blockType].rotations[g.rotationIndex], g.pos, g.grid)) {
             if (audioRefs.current.bgm) audioRefs.current.bgm.pause(); g.gameOverSoundTriggered = true; setMyGameOver(true);
             playSound('topout'); playSound('lose'); playSound('ed');
@@ -504,6 +515,9 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
                             if (g.blockType !== undefined) {
                                 const config = JSON.parse(localStorage.getItem('tetris_settings') || '{}');
                                 const leftKey = (config.Left || 'arrowleft').toLowerCase(), rightKey = (config.Right || 'arrowright').toLowerCase();
+                                const downKey = (config.Down || 'arrowdown').toLowerCase();
+
+                                // Horizontal Move (DAS)
                                 let moveDir = 0; if (g.keysDown[leftKey]) moveDir = -1; else if (g.keysDown[rightKey]) moveDir = 1;
                                 if (moveDir !== 0) {
                                     if (g.lastMoveDir !== moveDir) {
@@ -514,6 +528,17 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
                                     }
                                     else { g.dasCounter++; let threshold = g.isDashing ? 6 : 16; if (g.dasCounter >= threshold) { g.pos.x += moveDir; if (collide(BLOCKS_ROTATIONS[g.blockType].rotations[g.rotationIndex], g.pos, g.grid)) g.pos.x -= moveDir; else playSound('move'); g.dasCounter = 1; g.isDashing = true; } }
                                 } else { g.lastMoveDir = 0; g.dasCounter = 0; g.isDashing = false; }
+
+                                // Soft Drop (No DAS)
+                                if (g.keysDown[downKey] && g.startPreDropWait <= 0 && g.startWait <= 0 && g.blockType !== undefined) {
+                                    g.downCounter++;
+                                    if (g.downCounter >= 2) { // 30Hz soft drop
+                                        handleSoftDrop();
+                                        g.downCounter = 0;
+                                    }
+                                } else {
+                                    g.downCounter = 0;
+                                }
                             }
                             if (g.startPreDropWait > 0) { g.startPreDropWait--; if (g.blockType === undefined) spawnBlock(); }
                             else if (g.startWait > 0) { g.startWait--; }
@@ -567,7 +592,6 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
             if (!e.repeat && (k === leftKey || k === rightKey)) g.clickIntervals.push(performance.now());
             const keys = { down: (config.Down || 'arrowdown').toLowerCase(), drop: (config.Drop || 'space').toLowerCase(), rotateR: (config['Rotate-Right'] || 'z').toLowerCase(), rotateL: (config['Rotate-Left'] || 'x').toLowerCase() };
             if (g.startPreDropWait <= 0 && g.startWait <= 0) {
-                if (k === keys.down) handleSoftDrop();
                 if (k === keys.drop && !e.repeat) handleHardDrop();
             }
             if (k === keys.rotateL) handleRotateLeft();
