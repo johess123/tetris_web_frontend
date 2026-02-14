@@ -492,7 +492,14 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
 
                         if (g.bgCount % 3 === 0) {
                             setUiStates(prev => ({ ...prev, [playerIndex === 0 ? 'p1' : 'p2']: { ...myRef.current } }));
-                            const now = performance.now(); g.clickIntervals = g.clickIntervals.filter(t => now - t < 1000); let finalHz = 0; if (g.clickIntervals.length > 1) { const duration = g.clickIntervals[g.clickIntervals.length - 1] - g.clickIntervals[0]; if (duration > 0) finalHz = ((g.clickIntervals.length - 1) / duration) * 1000; }
+                            const now = performance.now(); g.clickIntervals = g.clickIntervals.filter(t => now - t < 1000);
+                            let finalHz = 0;
+                            if (g.clickIntervals.length > 1) {
+                                const duration = g.clickIntervals[g.clickIntervals.length - 1] - g.clickIntervals[0];
+                                finalHz = duration > 5 ? ((g.clickIntervals.length - 1) / duration) * 1000 : g.clickIntervals.length;
+                            } else {
+                                finalHz = g.clickIntervals.length;
+                            }
                             g.hz = finalHz.toFixed(2);
                             socket.emit('tetris_server_block', { room_num: roomData.roomNum, uid: user.account, grid: g.grid, score: g.score, lines: g.lines, level: g.level, hz: g.hz, nextBlockType: g.nextBlockType, drt: g.drt, trt: Math.round((g.tetrisLines / (g.lines || 1)) * 100), brn: g.brn, pos: g.pos, rotationIndex: g.rotationIndex, blockType: g.blockType, clearingLines: g.clearingLines, clearingPhase: g.clearingPhase, flashActive: g.flashActive, flashFrameCounter: g.flashFrameCounter, flashWhiteIdx: g.flashWhiteIdx, flashLevel: g.flashLevel, tetris19Num: g.tetris19Num, tetrisNum: g.tetrisNum, startWait: g.startWait });
                         }

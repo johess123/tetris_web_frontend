@@ -109,10 +109,29 @@ const Settings = ({ onBack }) => {
     };
 
     return (
-        <div className="settings-screen" style={{ background: '#000', height: '100vh', width: '100vw', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '50px', fontFamily: '"Press Start 2P"' }}>
-            <h1 style={{ fontSize: '3rem', color: 'cyan', marginBottom: '50px' }}>SETTINGS</h1>
+        <div className="settings-screen" style={{
+            background: '#000',
+            minHeight: '100vh',
+            width: '100%',
+            color: 'white',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '40px 20px',
+            fontFamily: '"Press Start 2P"',
+            overflowY: 'auto',
+            boxSizing: 'border-box'
+        }}>
+            <h1 style={{ fontSize: '2.5rem', color: 'cyan', marginBottom: '100px', textAlign: 'center' }}>SETTINGS</h1>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', width: '700px', fontSize: '1rem' }}>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '20px 30px',
+                width: '100%',
+                maxWidth: '700px',
+                fontSize: '0.9rem'
+            }}>
                 {keysToConfig.map(item => (
                     <React.Fragment key={item.key}>
                         <div style={{ alignSelf: 'center' }}>{item.label}</div>
@@ -121,38 +140,51 @@ const Settings = ({ onBack }) => {
                             style={{
                                 background: listeningKey === item.key ? '#555' : '#333',
                                 border: '2px solid white',
-                                padding: '15px',
+                                padding: '12px',
                                 textAlign: 'center',
                                 cursor: 'pointer',
-                                color: listeningKey === item.key ? 'yellow' : 'white'
+                                color: listeningKey === item.key ? 'yellow' : 'white',
+                                fontSize: '0.8rem',
+                                minHeight: '40px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
                             }}
                         >
-                            {listeningKey === item.key ? 'PRESS KEY OR BUTTON...' : formatKey(settings[item.key])}
+                            {listeningKey === item.key ? 'WAITING...' : formatKey(settings[item.key])}
                         </div>
                     </React.Fragment>
                 ))}
 
-                <div style={{ alignSelf: 'center' }}>Show Preview</div>
+                <div style={{ alignSelf: 'center' }}>Preview</div>
                 <select
                     value={settings.show_preview}
                     onChange={(e) => setSettings(prev => ({ ...prev, show_preview: e.target.value }))}
-                    style={{ background: '#333', color: 'white', border: '2px solid white', padding: '15px', fontFamily: '"Press Start 2P"' }}
+                    style={{
+                        background: '#333',
+                        color: 'white',
+                        border: '2px solid white',
+                        padding: '12px',
+                        fontFamily: '"Press Start 2P"',
+                        fontSize: '0.8rem',
+                        cursor: 'pointer'
+                    }}
                 >
                     <option value="1">ON</option>
                     <option value="0">OFF</option>
                 </select>
             </div>
 
-            <div style={{ display: 'flex', gap: '40px', marginTop: '60px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px', marginTop: '80px', marginBottom: '20px' }}>
                 <button
                     onClick={handleSave}
-                    style={{ background: 'none', border: '2px solid cyan', color: 'cyan', padding: '15px 30px', cursor: 'pointer', fontSize: '1.2rem', fontFamily: '"Press Start 2P"' }}
+                    style={{ background: 'none', border: '2px solid cyan', color: 'cyan', padding: '12px 24px', cursor: 'pointer', fontSize: '1rem', fontFamily: '"Press Start 2P"' }}
                 >
                     SAVE & QUIT
                 </button>
                 <button
                     onClick={onBack}
-                    style={{ background: 'none', border: '2px solid red', color: 'red', padding: '15px 30px', cursor: 'pointer', fontSize: '1.2rem', fontFamily: '"Press Start 2P"' }}
+                    style={{ background: 'none', border: '2px solid red', color: 'red', padding: '12px 24px', cursor: 'pointer', fontSize: '1rem', fontFamily: '"Press Start 2P"' }}
                 >
                     BACK
                 </button>
