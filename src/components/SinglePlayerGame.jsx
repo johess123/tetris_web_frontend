@@ -326,7 +326,7 @@ const SinglePlayerGame = ({ user, roomData, onBack }) => {
             if (Array.isArray(value)) audioRefs.current[key] = value.map(src => new Audio(src));
             else { audioRefs.current[key] = new Audio(value); if (key === 'bgm') { audioRefs.current[key].loop = true; audioRefs.current[key].volume = 0.5; } }
         });
-        for (let i = 1; i <= BG_IMAGES_COUNT; i++) { const img = new Image(); img.src = `/img_multi/bg${i}.png`; bgImages.current.push(img); }
+        for (let i = 1; i <= BG_IMAGES_COUNT; i++) { const img = new Image(); img.src = `/img_multi/bg${i}.jpg`; bgImages.current.push(img); }
         for (let i = 1; i <= 12; i++) { const img = new Image(); const ext = [12, 3, 4, 6, 8].includes(i) ? 'png' : 'jpg'; img.src = `/img_multi/white${i}.${ext}`; whiteImages.current.push(img); }
         const g1 = new Image(); g1.src = '/img_multi/gray1.png'; const g2 = new Image(); g2.src = '/img_multi/gray2.jpg';
         grayFlashImages.current = [g1, g2]; grayBg.current = new Image(); grayBg.current.src = '/img_multi/gray.jpg';
