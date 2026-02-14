@@ -66,16 +66,16 @@ const RoomSelection = ({ user, onJoin, onLogout, onSettings }) => {
                 <div className="leader-panel">
                     <div className="leader-title">Leader Board</div>
                     <div className="leader-headers">
-                        <span style={{ color: 'red', width: '130px' }}>Rank</span>
-                        <span style={{ color: 'cyan', width: '220px' }}>Name</span>
-                        <span style={{ color: 'yellow', width: '100px' }}>Score</span>
+                        <span style={{ color: 'red', width: '100px' }}>Rank</span>
+                        <span style={{ color: 'cyan', width: '200px' }}>Name</span>
+                        <span style={{ color: 'yellow', width: '80px' }}>Score</span>
                     </div>
                     <div className="leader-list">
                         {leaderboard.map((player, i) => (
                             <div key={i} className="leader-item">
-                                <span style={{ width: '130px' }}><img src={`/img_multi/${i + 1}.png`} alt={i + 1} style={{ height: '50px' }} /></span>
-                                <span style={{ width: '220px', fontSize: '1.2rem' }}>{player.name}</span>
-                                <span style={{ width: '100px', fontSize: '1.2rem' }}>{player.score}</span>
+                                <span style={{ width: '100px' }}><img src={`/img_multi/${i + 1}.png`} alt={i + 1} style={{ height: '35px' }} /></span>
+                                <span style={{ width: '200px', fontSize: '0.9rem' }}>{player.name}</span>
+                                <span style={{ width: '80px', fontSize: '0.9rem' }}>{player.score}</span>
                             </div>
                         ))}
                     </div>

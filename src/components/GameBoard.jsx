@@ -522,14 +522,8 @@ const GameBoard = ({ user, roomData, onBack }) => {
                     g.bgCount++; if (g.bgCount >= 80) g.bgCount = 0;
                     if (g.bgCount % 5 === 0) { // Sync more frequently for movement
                         const now = performance.now(); g.clickIntervals = g.clickIntervals.filter(t => now - t < 1000);
-                        let finalHz = 0;
-                        if (g.clickIntervals.length > 1) {
-                            const duration = g.clickIntervals[g.clickIntervals.length - 1] - g.clickIntervals[0];
-                            finalHz = duration > 5 ? ((g.clickIntervals.length - 1) / duration) * 1000 : g.clickIntervals.length;
-                        } else {
-                            finalHz = g.clickIntervals.length;
-                        }
-                        g.hz = finalHz.toFixed(2); setUiStats(prev => ({ ...prev, hz: g.hz }));
+                        g.hz = g.clickIntervals.length.toFixed(2);
+                        setUiStats(prev => ({ ...prev, hz: g.hz }));
                         if (roomData.roomNum !== -1 && socket && socket.connected && !myGameOver) {
                             socket.emit('tetris_server_block', { room_num: roomData.roomNum, uid: user.account, grid: g.grid, score: g.score, lines: g.lines, level: g.level, hz: g.hz, nextBlockType: g.nextBlockType, drt: g.drt, trt: Math.round((g.tetrisLines / (g.lines || 1)) * 100), brn: g.brn, pos: g.pos, rotationIndex: g.rotationIndex, blockType: g.blockType });
                         }

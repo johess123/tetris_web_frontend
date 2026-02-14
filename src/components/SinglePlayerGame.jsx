@@ -386,15 +386,11 @@ const SinglePlayerGame = ({ user, roomData, onBack }) => {
                 while (accumulator >= tickRate) {
                     pollGamepad();
                     g.bgCount++; if (g.bgCount >= 80) g.bgCount = 0;
-                    const now = performance.now(); g.clickIntervals = g.clickIntervals.filter(t => now - t < 1000);
-                    let finalHz = 0;
-                    if (g.clickIntervals.length > 1) {
-                        const duration = g.clickIntervals[g.clickIntervals.length - 1] - g.clickIntervals[0];
-                        finalHz = duration > 5 ? ((g.clickIntervals.length - 1) / duration) * 1000 : g.clickIntervals.length;
-                    } else {
-                        finalHz = g.clickIntervals.length;
+                    if (g.bgCount % 10 === 0) {
+                        const now = performance.now(); g.clickIntervals = g.clickIntervals.filter(t => now - t < 1000);
+                        g.hz = g.clickIntervals.length.toFixed(2);
+                        setUiStats(prev => ({ ...prev, hz: g.hz }));
                     }
-                    g.hz = finalHz.toFixed(2); setUiStats(prev => ({ ...prev, hz: g.hz }));
                     if (g.flashActive) {
                         g.flashFrameCounter--;
                         if (g.flashFrameCounter <= 0) {
