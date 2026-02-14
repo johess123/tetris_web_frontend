@@ -182,6 +182,13 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
         if (collide(BLOCKS_ROTATIONS[g.blockType].rotations[g.rotationIndex], g.pos, g.grid)) {
             if (audioRefs.current.bgm) audioRefs.current.bgm.pause(); g.gameOverSoundTriggered = true; setMyGameOver(true);
             playSound('topout'); playSound('lose'); playSound('ed');
+
+            if (playerIndex >= 0 && playerIndex < 2) {
+                const myRef = playerIndex === 0 ? p1Data : p2Data;
+                myRef.current = { ...myRef.current, isGameOver: true };
+                setUiStates(prev => ({ ...prev, [playerIndex === 0 ? 'p1' : 'p2']: { ...myRef.current } }));
+            }
+
             if (socket) {
                 socket.emit('gameover', { room_num: roomData.roomNum, uid: user.account });
                 const currentRoomStats = roomStatsRef.current;
@@ -300,6 +307,7 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
             socket.on('get_random_block', (data) => { myGameRef.current.seeds = data.random_block; setPreGameCount(3); setGameState('COUNTING'); });
 
             socket.on('tetris_client_block', (data) => {
+                if (data.uid === user.account) return;
                 const targetIdx = roomStatsRef.current.player_name.indexOf(data.uid); if (targetIdx === -1) return;
                 const ref = targetIdx === 0 ? p1Data : p2Data; ref.current = { ...ref.current, ...data };
                 setUiStates(prev => ({ ...prev, [targetIdx === 0 ? 'p1' : 'p2']: { ...ref.current } }));
@@ -307,6 +315,7 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
             });
 
             socket.on('client_gameover', (data) => {
+                if (data.uid === user.account) return;
                 const currentRoomStats = roomStatsRef.current;
                 const targetIdx = currentRoomStats.player_name.indexOf(data.uid); if (targetIdx === -1) return;
                 const ref = targetIdx === 0 ? p1Data : p2Data; ref.current.isGameOver = true;
@@ -480,8 +489,9 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
                     if (playerIndex >= 0 && playerIndex < 2 && !myGameOver) {
                         const myRef = playerIndex === 0 ? p1Data : p2Data;
                         myRef.current = { ...myRef.current, grid: g.grid, score: g.score, lines: g.lines, level: g.level, hz: g.hz, nextBlockType: g.nextBlockType, drt: g.drt, trt: Math.round((g.tetrisLines / (g.lines || 1)) * 100), brn: g.brn, pos: g.pos, rotationIndex: g.rotationIndex, blockType: g.blockType, clearingLines: g.clearingLines, clearingPhase: g.clearingPhase, flashActive: g.flashActive, flashFrameCounter: g.flashFrameCounter, flashWhiteIdx: g.flashWhiteIdx, flashLevel: g.flashLevel, tetris19Num: g.tetris19Num, tetrisNum: g.tetrisNum, startWait: g.startWait, isGameOver: myGameOver };
-                        setUiStates(prev => ({ ...prev, [playerIndex === 0 ? 'p1' : 'p2']: { ...myRef.current } }));
+
                         if (g.bgCount % 3 === 0) {
+                            setUiStates(prev => ({ ...prev, [playerIndex === 0 ? 'p1' : 'p2']: { ...myRef.current } }));
                             const now = performance.now(); g.clickIntervals = g.clickIntervals.filter(t => now - t < 1000); let finalHz = 0; if (g.clickIntervals.length > 1) { const duration = g.clickIntervals[g.clickIntervals.length - 1] - g.clickIntervals[0]; if (duration > 0) finalHz = ((g.clickIntervals.length - 1) / duration) * 1000; }
                             g.hz = finalHz.toFixed(2);
                             socket.emit('tetris_server_block', { room_num: roomData.roomNum, uid: user.account, grid: g.grid, score: g.score, lines: g.lines, level: g.level, hz: g.hz, nextBlockType: g.nextBlockType, drt: g.drt, trt: Math.round((g.tetrisLines / (g.lines || 1)) * 100), brn: g.brn, pos: g.pos, rotationIndex: g.rotationIndex, blockType: g.blockType, clearingLines: g.clearingLines, clearingPhase: g.clearingPhase, flashActive: g.flashActive, flashFrameCounter: g.flashFrameCounter, flashWhiteIdx: g.flashWhiteIdx, flashLevel: g.flashLevel, tetris19Num: g.tetris19Num, tetrisNum: g.tetrisNum, startWait: g.startWait });
