@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useSocket } from '../context/SocketContext';
 
+const formatScore = (score) => {
+    const s = parseInt(score) || 0;
+    if (s < 1000000) return String(s).padStart(6, '0');
+    const letterIdx = Math.floor((s - 1000000) / 100000);
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+    if (letterIdx >= 0 && letterIdx < letters.length) {
+        const remainder = s % 100000;
+        return letters[letterIdx] + String(remainder).padStart(5, '0');
+    }
+    return String(s);
+};
+
 const RoomSelection = ({ user, onJoin, onLogout, onSettings }) => {
     const socket = useSocket();
     const [stats, setStats] = useState({ best: '0', win: '0', lose: '0', tie: '0' });
@@ -75,7 +87,7 @@ const RoomSelection = ({ user, onJoin, onLogout, onSettings }) => {
                             <div key={i} className="leader-item">
                                 <span style={{ width: '100px' }}><img src={`/img_multi/${i + 1}.png`} alt={i + 1} style={{ height: '35px' }} /></span>
                                 <span style={{ width: '200px', fontSize: '0.9rem' }}>{player.name}</span>
-                                <span style={{ width: '80px', fontSize: '0.9rem' }}>{player.score}</span>
+                                <span style={{ width: '80px', fontSize: '0.9rem' }}>{formatScore(player.score)}</span>
                             </div>
                         ))}
                     </div>

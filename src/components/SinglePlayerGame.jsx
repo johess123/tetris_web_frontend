@@ -65,6 +65,18 @@ const SOUNDS = {
     select: '/audio/select.mp3'
 };
 
+const formatScore = (score) => {
+    const s = parseInt(score) || 0;
+    if (s < 1000000) return String(s).padStart(6, '0');
+    const letterIdx = Math.floor((s - 1000000) / 100000);
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+    if (letterIdx >= 0 && letterIdx < letters.length) {
+        const remainder = s % 100000;
+        return letters[letterIdx] + String(remainder).padStart(5, '0');
+    }
+    return String(s);
+};
+
 const SinglePlayerGame = ({ user, roomData, onBack }) => {
     const gameScreenRef = useRef(null);
     const canvasRef = useRef(null);
@@ -516,21 +528,6 @@ const SinglePlayerGame = ({ user, roomData, onBack }) => {
         return () => clearInterval(timer);
     }, [gameState]);
 
-    const getRankIcon = (name, score, leader) => {
-        const acc = (name || '').trim();
-        const best = parseInt(score) || 0;
-        const rankIdx = (leader || []).findIndex(p => p.name.trim() === acc);
-        if (rankIdx >= 0 && rankIdx < 5) return `/img_multi/${rankIdx + 1}.png`;
-        if (best < 10000) return '/img_multi/bronze.png';
-        if (best < 50000) return '/img_multi/silver.png';
-        if (best < 100000) return '/img_multi/gold.png';
-        if (best < 200000) return '/img_multi/diamond.png';
-        if (best < 500000) return '/img_multi/s.png';
-        if (best < 750000) return '/img_multi/ss.png';
-        if (best < 1000000) return '/img_multi/sss.png';
-        return '/img_multi/ssss.png';
-    };
-
     useEffect(() => {
         let timer; if (gameState === 'GAMEOVER') { timer = setInterval(() => { setGameOverCountdown(prev => { if (prev <= 1) { clearInterval(timer); onBack(); return 0; } return prev - 1; }); }, 1000); }
         return () => clearInterval(timer);
@@ -568,13 +565,12 @@ const SinglePlayerGame = ({ user, roomData, onBack }) => {
                     </div>
                     <div className="board-center" style={{ textAlign: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', marginBottom: '15px' }}>
-                            <img src={getRankIcon(user.account, roomData.stats.best, roomData.leaderboard)} alt="rank" style={{ width: '40px' }} />
                             <div style={{ color: 'white', fontFamily: '"Press Start 2P"', fontSize: '1.5rem' }}>{user.account}</div>
                         </div>
                         <div className="canvas-container" style={{ border: '4px solid #777', background: '#000' }}><canvas ref={canvasRef} width={BLOCK_SIZE * GRID_WIDTH} height={BLOCK_SIZE * GRID_HEIGHT} /></div>
                     </div>
                     <div className="right-stats" style={{ width: '160px', display: 'flex', flexDirection: 'column', gap: '30px', fontFamily: '"Press Start 2P"', color: 'white' }}>
-                        <div className="stat-group"><div style={{ fontSize: '1rem', marginBottom: '10px' }}>SCORE</div><div style={{ fontSize: '1.4rem' }}>{String(uiStats.score).padStart(6, '0')}</div></div>
+                        <div className="stat-group"><div style={{ fontSize: '1rem', marginBottom: '10px' }}>SCORE</div><div style={{ fontSize: '1.4rem' }}>{formatScore(uiStats.score)}</div></div>
                         <div className="stat-group"><div style={{ fontSize: '1rem', marginBottom: '10px' }}>LINES</div><div style={{ fontSize: '1.4rem' }}>{String(uiStats.lines).padStart(3, '0')}</div></div>
                         <div className="stat-group">
                             <div style={{ fontSize: '1rem', marginBottom: '10px' }}>NEXT</div>

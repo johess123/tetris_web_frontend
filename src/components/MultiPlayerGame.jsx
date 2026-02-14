@@ -34,6 +34,20 @@ const SOUNDS = {
     tetris: ['/audio/tetris1.mp3', '/audio/tetris2.mp3', '/audio/tetris3.mp3', '/audio/tetris4.mp3'], levelup: '/audio/levelup.mp3', lose: '/audio/lose.mp3', topout: '/audio/topout.mp3', ed: '/audio/ed.mp3', count: '/audio/count.mp3', select: '/audio/select.mp3'
 };
 
+const formatScore = (score) => {
+    const s = parseInt(score) || 0;
+    if (s < 1000000) return String(s).padStart(6, '0');
+    // 1,000,000 -> A00,000 (Index 0)
+    // 1,100,000 -> B00,000 (Index 1)
+    const letterIdx = Math.floor((s - 1000000) / 100000);
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+    if (letterIdx >= 0 && letterIdx < letters.length) {
+        const remainder = s % 100000;
+        return letters[letterIdx] + String(remainder).padStart(5, '0');
+    }
+    return String(s);
+};
+
 const MultiPlayerGame = ({ user, roomData, onBack }) => {
     const socket = useSocket();
     const gameScreenRef = useRef(null);
@@ -45,6 +59,7 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
     const [gameState, setGameState] = useState('LOBBY');
     const [preGameCount, setPreGameCount] = useState(3);
     const [gameOverCountdown, setGameOverCountdown] = useState(10);
+    const [showTetrisCount, setShowTetrisCount] = useState(false);
     const [winner, setWinner] = useState(null);
     const [playerIndex, setPlayerIndex] = useState(-1);
     const [roomStats, setRoomStats] = useState({ player_name: ['', ''], best_score: ['', ''], player_win: ['', ''], player_lose: ['', ''], player_tie: ['', ''], ready_level: [-1, -1] });
@@ -438,6 +453,13 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
     }, [gameState, selectedLevel, playerIndex]);
 
     useEffect(() => {
+        const timer = setInterval(() => {
+            setShowTetrisCount(prev => !prev);
+        }, 2000);
+        return () => clearInterval(timer);
+    }, []);
+
+    useEffect(() => {
         let timer;
         if (gameState === 'GAMEOVER') {
             timer = setInterval(() => {
@@ -625,7 +647,7 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
                 <div style={{ color: 'yellow', fontSize: '1.5rem', marginBottom: '15px' }}>Player{idx + 1}</div>
                 <div style={{ color: 'white', fontSize: '1.2rem', marginBottom: '30px' }}>{name}</div>
                 <div style={{ color: 'cyan', fontSize: '1.2rem', marginBottom: '10px' }}>Best Score</div>
-                <div style={{ color: 'white', fontSize: '1.2rem', marginBottom: '30px' }}>{String(best).padStart(6, '0')}</div>
+                <div style={{ color: 'white', fontSize: '1.2rem', marginBottom: '30px' }}>{formatScore(best)}</div>
                 <div style={{ display: 'flex', justifyContent: idx === 0 ? 'flex-start' : 'flex-end', gap: '15px', marginBottom: '10px' }}>
                     <span style={{ color: 'red', fontSize: '0.9rem' }}>Win</span>
                     <span style={{ color: 'cyan', fontSize: '0.9rem' }}>Lose</span>
@@ -648,12 +670,52 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
 
     const renderPlayerModule = (pos) => {
         const data = pos === 0 ? uiStates.p1 : uiStates.p2;
+        const otherData = pos === 0 ? uiStates.p2 : uiStates.p1;
         const name = roomStats.player_name[pos] || 'Waiting...';
         const canvas = pos === 0 ? canvasRef : oppCanvasRef;
         const nextCanvas = pos === 0 ? nextCanvasRef : oppNextCanvasRef;
+
+        const diff = data.score - otherData.score;
+        let diffText = '';
+        let diffColor = 'white';
+
+        const trailingLevel = data.score < otherData.score ? data.level : otherData.level;
+        const tetrisValue = 1200 * (trailingLevel + 1);
+
+        if (diff > 0) {
+            diffColor = '#00ff00';
+            if (showTetrisCount) {
+                const count = (diff / tetrisValue).toFixed(2);
+                diffText = (
+                    <>
+                        <span style={{ color: '#00ff00' }}>+{count}</span>
+                        <span style={{ color: '#00ff00', marginLeft: '10px' }}>TETRIS</span>
+                    </>
+                );
+            } else {
+                diffText = `+${diff}`;
+            }
+        } else if (diff < 0) {
+            diffColor = '#ff4444';
+            if (showTetrisCount) {
+                const count = (Math.abs(diff) / tetrisValue).toFixed(2);
+                diffText = (
+                    <>
+                        <span style={{ color: '#ff4444' }}>{count}</span>
+                        <span style={{ color: '#ff4444', marginLeft: '10px' }}>TETRIS</span>
+                    </>
+                );
+            } else {
+                diffText = `${diff}`;
+            }
+        } else {
+            diffText = '0';
+            diffColor = 'white';
+        }
+
         return (
             <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
-                <div className="left-stats" style={{ width: '100px', display: 'flex', flexDirection: 'column', gap: '40px', fontFamily: '"Press Start 2P"', color: 'white' }}>
+                <div className="left-stats" style={{ width: '120px', display: 'flex', flexDirection: 'column', gap: '40px', fontFamily: '"Press Start 2P"', color: 'white', alignItems: 'flex-end', textAlign: 'right' }}>
                     <div className="stat-group"><div style={{ fontSize: '1rem', marginBottom: '10px' }}>DRT</div><div style={{ fontSize: '1.4rem', color: data.drt > 12 ? 'red' : 'white' }}>{String(data.drt).padStart(3, '0')}</div></div>
                     <div className="stat-group"><div style={{ fontSize: '1rem', marginBottom: '10px' }}>TRT</div><div style={{ fontSize: '1.4rem' }}>{data.trt}%</div></div>
                     <div className="stat-group"><div style={{ fontSize: '1rem', marginBottom: '10px' }}>BRN</div><div style={{ fontSize: '1.4rem' }}>{String(data.brn).padStart(3, '0')}</div></div>
@@ -662,8 +724,24 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
                     <div style={{ color: 'white', fontFamily: '"Press Start 2P"', fontSize: '1.5rem', marginBottom: '15px' }}>{name}</div>
                     <div className="canvas-container" style={{ border: '4px solid #777', background: '#000' }}><canvas ref={canvas} width={BLOCK_SIZE * GRID_WIDTH} height={BLOCK_SIZE * GRID_HEIGHT} /></div>
                 </div>
-                <div className="right-stats" style={{ width: '160px', display: 'flex', flexDirection: 'column', gap: '30px', fontFamily: '"Press Start 2P"', color: 'white' }}>
-                    <div className="stat-group"><div style={{ fontSize: '1rem', marginBottom: '10px' }}>SCORE</div><div style={{ fontSize: '1.4rem' }}>{String(data.score).padStart(6, '0')}</div></div>
+                <div className="right-stats" style={{ width: '220px', display: 'flex', flexDirection: 'column', gap: '30px', fontFamily: '"Press Start 2P"', color: 'white' }}>
+                    <div className="stat-group">
+                        <div style={{
+                            fontSize: '1.2rem',
+                            color: diffColor,
+                            height: '1.4rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'flex-start',
+                            marginBottom: '35px',
+                            whiteSpace: 'nowrap',
+                            visibility: (gameState === 'PLAYING' || gameState === 'GAMEOVER') ? 'visible' : 'hidden'
+                        }}>
+                            {diffText}
+                        </div>
+                        <div style={{ fontSize: '1rem', marginBottom: '10px' }}>SCORE</div>
+                        <div style={{ fontSize: '1.4rem' }}>{formatScore(data.score)}</div>
+                    </div>
                     <div className="stat-group"><div style={{ fontSize: '1rem', marginBottom: '10px' }}>LINES</div><div style={{ fontSize: '1.4rem' }}>{String(data.lines).padStart(3, '0')}</div></div>
                     <div className="stat-group"><div style={{ fontSize: '1rem', marginBottom: '10px' }}>NEXT</div><div style={{ height: '90px', width: '120px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><canvas ref={nextCanvas} width="120" height="90" /></div></div>
                     <div className="stat-group"><div style={{ fontSize: '1rem', marginBottom: '10px' }}>LEVEL</div><div style={{ fontSize: '1.4rem' }}>{String(data.level).padStart(2, '0')}</div></div>
@@ -711,7 +789,7 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
                                             'TIE GAME'}
                         </div>
                         <div style={{ fontSize: '1.2rem', color: 'white', fontFamily: '"Press Start 2P"', marginTop: '20px' }}>
-                            P1: {p1Data.current.score} | P2: {p2Data.current.score}
+                            P1: {formatScore(p1Data.current.score)} | P2: {formatScore(p2Data.current.score)}
                         </div>
                         <div style={{ fontSize: '1.2rem', color: 'red', fontFamily: '"Press Start 2P"' }}>Returning in {gameOverCountdown}s...</div>
                     </div>
