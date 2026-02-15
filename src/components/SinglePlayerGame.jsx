@@ -47,7 +47,7 @@ const COLOR_PALETTES = [
 
 const ALL_SPEEDS = [48, 43, 38, 33, 28, 23, 18, 13, 8, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1];
 const ADVANCE_LINES = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 100, 100, 100, 100, 100, 100, 110, 120, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130];
-const BG_IMAGES_COUNT = 20;
+const BG_IMAGES_COUNT = 1;
 
 const SOUNDS = {
     bgm: '/audio/bgm.mp3',
@@ -127,7 +127,6 @@ const SinglePlayerGame = ({ user, roomData, onBack }) => {
     });
 
     const audioRefs = useRef({});
-    const bgImages = useRef([]);
     const whiteImages = useRef([]);
     const grayFlashImages = useRef([]);
     const grayBg = useRef(null);
@@ -214,9 +213,6 @@ const SinglePlayerGame = ({ user, roomData, onBack }) => {
         const ctx = canvasRef.current.getContext('2d');
         const g = gameRef.current;
         const settings = JSON.parse(localStorage.getItem('tetris_settings') || '{}');
-
-        const bgIdx = Math.floor(g.bgCount / 4) % BG_IMAGES_COUNT;
-        if (bgImages.current[bgIdx] && gameScreenRef.current) gameScreenRef.current.style.backgroundImage = `url(${bgImages.current[bgIdx].src})`;
 
         if (g.level % 10 === 9 && grayBg.current && grayBg.current.complete) ctx.drawImage(grayBg.current, 0, 0, ctx.canvas.width, ctx.canvas.height);
         else { ctx.fillStyle = 'rgba(0, 0, 0, 1.0)'; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); }
@@ -339,7 +335,6 @@ const SinglePlayerGame = ({ user, roomData, onBack }) => {
             if (Array.isArray(value)) audioRefs.current[key] = value.map(src => new Audio(src));
             else { audioRefs.current[key] = new Audio(value); if (key === 'bgm') { audioRefs.current[key].loop = true; audioRefs.current[key].volume = 0.5; } }
         });
-        for (let i = 1; i <= BG_IMAGES_COUNT; i++) { const img = new Image(); img.src = `/img_multi/bg${i}.jpg`; bgImages.current.push(img); }
         for (let i = 1; i <= 12; i++) { const img = new Image(); const ext = [12, 3, 4, 6, 8].includes(i) ? 'png' : 'jpg'; img.src = `/img_multi/white${i}.${ext}`; whiteImages.current.push(img); }
         const g1 = new Image(); g1.src = '/img_multi/gray1.png'; const g2 = new Image(); g2.src = '/img_multi/gray2.jpg';
         grayFlashImages.current = [g1, g2]; grayBg.current = new Image(); grayBg.current.src = '/img_multi/gray.jpg';
@@ -534,7 +529,7 @@ const SinglePlayerGame = ({ user, roomData, onBack }) => {
     }, [gameState, onBack]);
 
     return (
-        <div className="game-screen" ref={gameScreenRef}>
+        <div className="game-screen" ref={gameScreenRef} style={{ backgroundImage: 'url(/img_multi/bg1.jpg)', backgroundSize: 'cover' }}>
             {gameState === 'COUNTING' && (
                 <div style={{
                     position: 'absolute',

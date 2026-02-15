@@ -27,7 +27,7 @@ const COLOR_PALETTES = [
 
 const ALL_SPEEDS = [48, 43, 38, 33, 28, 23, 18, 13, 8, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1];
 const ADVANCE_LINES = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 100, 100, 100, 100, 100, 100, 110, 120, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130];
-const BG_IMAGES_COUNT = 20;
+const BG_IMAGES_COUNT = 1;
 
 const SOUNDS = {
     bgm: '/audio/bgm.mp3', move: '/audio/move.mp3', land: '/audio/land.mp3', single: '/audio/single.mp3', double: '/audio/double.mp3', triple: '/audio/triple.mp3',
@@ -143,7 +143,6 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
     useEffect(() => { roomStatsRef.current = roomStats; }, [roomStats]);
 
     const audioRefs = useRef({});
-    const bgImages = useRef([]);
     const whiteImages = useRef([]);
     const grayFlashImages = useRef([]);
     const grayBg = useRef(null);
@@ -251,10 +250,6 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
     };
 
     const draw = useCallback(() => {
-        if (gameScreenRef.current && bgImages.current.length > 0) {
-            const bgIdx = Math.floor(myGameRef.current.bgCount / 4) % BG_IMAGES_COUNT;
-            gameScreenRef.current.style.backgroundImage = `url(${bgImages.current[bgIdx].src})`;
-        }
         playersData.forEach((pRef, idx) => {
             drawBoard(canvasRefs[idx], pRef.current);
         });
@@ -343,7 +338,6 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
                 }
             }
         });
-        for (let i = 1; i <= BG_IMAGES_COUNT; i++) { const img = new Image(); img.src = `/img_multi/bg${i}.jpg`; bgImages.current.push(img); }
         for (let i = 1; i <= 12; i++) { const img = new Image(); const ext = [12, 3, 4, 6, 8].includes(i) ? 'png' : 'jpg'; img.src = `/img_multi/white${i}.${ext}`; whiteImages.current.push(img); }
         const g1 = new Image(); g1.src = '/img_multi/gray1.png'; const g2 = new Image(); g2.src = '/img_multi/gray2.jpg';
         grayFlashImages.current = [g1, g2];
@@ -432,15 +426,26 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
 
             socket.on('gameover_sync', () => {
                 const currentRoomStats = roomStatsRef.current;
-                const playersInRoom = currentRoomStats.player_name.filter(name => name !== '');
-                const scores = playersInRoom.map((name, idx) => ({ name, score: playersData[idx].current.score }));
+                const scores = currentRoomStats.player_name
+                    .map((name, i) => ({ name, score: playersData[i].current.score }))
+                    .filter(p => p.name !== '');
+
                 scores.sort((a, b) => b.score - a.score);
                 const myIdx = currentRoomStats.player_name.indexOf(user.account);
                 const amIPlayer = (myIdx >= 0 && myIdx < 4);
 
                 if (amIPlayer) {
-                    if (scores[0].name === user.account) setWinner('WIN');
-                    else setWinner('LOSE');
+                    const myScore = playersData[myIdx].current.score;
+                    const topScore = scores[0].score;
+                    const isTop = (myScore === topScore);
+                    const othersWithTop = scores.filter(p => p.name !== user.account && p.score === topScore);
+
+                    if (isTop) {
+                        if (othersWithTop.length > 0) setWinner('TIE');
+                        else setWinner('WIN');
+                    } else {
+                        setWinner('LOSE');
+                    }
                 } else {
                     setWinner('GAMEOVER');
                 }
@@ -965,7 +970,7 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
     };
 
     return (
-        <div className="game-screen" ref={gameScreenRef}>
+        <div className="game-screen" ref={gameScreenRef} style={{ backgroundImage: 'url(/img_multi/bg1.jpg)', backgroundSize: 'cover' }}>
             {gameState === 'LOBBY' && roomData.roomNum !== -1 && renderLobby()}
             {gameState === 'COUNTING' && (
                 <div style={{
