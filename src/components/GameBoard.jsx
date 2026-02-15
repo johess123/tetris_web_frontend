@@ -175,7 +175,7 @@ const GameBoard = ({ user, roomData, onBack }) => {
     const collide = useCallback((coords, pos, grid) => {
         for (let coord of coords) {
             const px = coord[0] + pos.x, py = coord[1] + pos.y;
-            if (px < 0 || px >= GRID_WIDTH || py >= GRID_HEIGHT || py < 0 || (py >= 0 && grid[py][px] !== 0)) return true;
+            if (px < 0 || px >= GRID_WIDTH || py < 0 || py >= GRID_HEIGHT || (py >= 0 && grid[py] && grid[py][px] !== 0)) return true;
         }
         return false;
     }, []);
@@ -466,14 +466,34 @@ const GameBoard = ({ user, roomData, onBack }) => {
         const g = gameRef.current;
         if (g.blockType === undefined) return;
         const nextRot = (g.rotationIndex + 1) % BLOCKS_ROTATIONS[g.blockType].num;
-        if (!collide(BLOCKS_ROTATIONS[g.blockType].rotations[nextRot], g.pos, g.grid)) { g.rotationIndex = nextRot; playSound('move'); }
+        const coords = BLOCKS_ROTATIONS[g.blockType].rotations[nextRot];
+        const kicks = [[0, 0], [-1, 0], [1, 0], [-2, 0], [2, 0], [0, 1], [0, 2]];
+        for (let [dx, dy] of kicks) {
+            if (!collide(coords, { x: g.pos.x + dx, y: g.pos.y + dy }, g.grid)) {
+                g.pos.x += dx;
+                g.pos.y += dy;
+                g.rotationIndex = nextRot;
+                playSound('move');
+                return;
+            }
+        }
     }, [collide, playSound]);
 
     const handleRotateRight = useCallback(() => {
         const g = gameRef.current;
         if (g.blockType === undefined) return;
         const nextRot = (g.rotationIndex - 1 + BLOCKS_ROTATIONS[g.blockType].num) % BLOCKS_ROTATIONS[g.blockType].num;
-        if (!collide(BLOCKS_ROTATIONS[g.blockType].rotations[nextRot], g.pos, g.grid)) { g.rotationIndex = nextRot; playSound('move'); }
+        const coords = BLOCKS_ROTATIONS[g.blockType].rotations[nextRot];
+        const kicks = [[0, 0], [-1, 0], [1, 0], [-2, 0], [2, 0], [0, 1], [0, 2]];
+        for (let [dx, dy] of kicks) {
+            if (!collide(coords, { x: g.pos.x + dx, y: g.pos.y + dy }, g.grid)) {
+                g.pos.x += dx;
+                g.pos.y += dy;
+                g.rotationIndex = nextRot;
+                playSound('move');
+                return;
+            }
+        }
     }, [collide, playSound]);
 
     useEffect(() => {
