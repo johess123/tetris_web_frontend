@@ -529,7 +529,24 @@ const SinglePlayerGame = ({ user, roomData, onBack }) => {
     }, [gameState, onBack]);
 
     return (
-        <div className="game-screen" ref={gameScreenRef} style={{ backgroundImage: 'url(/img_multi/bg1.jpg)', backgroundSize: 'cover' }}>
+        <div className="game-screen" ref={gameScreenRef}>
+            <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    zIndex: -1
+                }}
+            >
+                <source src="/img_multi/bg.mp4" type="video/mp4" />
+            </video>
             {gameState === 'COUNTING' && (
                 <div style={{
                     position: 'absolute',

@@ -248,7 +248,6 @@ const GameBoard = ({ user, roomData, onBack }) => {
         // Main Board
         if (canvasRef.current) {
             const ctx = canvasRef.current.getContext('2d');
-            if (gameScreenRef.current) gameScreenRef.current.style.backgroundImage = `url(/img_multi/bg1.jpg)`;
 
             if (g.level % 10 === 9 && grayBg.current && grayBg.current.complete) ctx.drawImage(grayBg.current, 0, 0, ctx.canvas.width, ctx.canvas.height);
             else { ctx.fillStyle = 'rgba(0, 0, 0, 1.0)'; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); }
@@ -752,7 +751,24 @@ const GameBoard = ({ user, roomData, onBack }) => {
     };
 
     return (
-        <div className="game-screen" ref={gameScreenRef} style={{ backgroundImage: 'url(/img_multi/bg1.jpg)', backgroundSize: 'cover' }}>
+        <div className="game-screen" ref={gameScreenRef}>
+            <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    zIndex: -1
+                }}
+            >
+                <source src="/img_multi/bg.mp4" type="video/mp4" />
+            </video>
             {gameState === 'LOBBY' && roomData.roomNum !== -1 && renderLobby()}
             {gameState === 'COUNTING' && <div style={{ position: 'absolute', inset: 0, background: '#000', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 10000 }}><div style={{ fontSize: '100px', color: '#fff', fontFamily: '"Press Start 2P"' }}>{preGameCount > 0 ? preGameCount : ''}</div></div>}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '80px', position: 'relative', zIndex: 1, padding: '20px' }}>
