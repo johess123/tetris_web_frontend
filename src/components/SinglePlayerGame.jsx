@@ -91,7 +91,17 @@ const SinglePlayerGame = ({ user, roomData, onBack }) => {
         blockType: undefined,
         rotationIndex: 0,
         nextBlockType: undefined,
-        seeds: Array.from({ length: 1000 }, () => Math.floor(Math.random() * 1000)),
+        seeds: (() => {
+            const s = [];
+            let last = -1, count = 0;
+            for (let i = 0; i < 1000; i++) {
+                let t;
+                do { t = Math.floor(Math.random() * 7); } while (t === last && count >= 2);
+                if (t === last) count++; else { last = t; count = 1; }
+                s.push(t);
+            }
+            return s;
+        })(),
         seedIndex: 0,
         dropCounter: 0,
         grid: Array.from({ length: GRID_HEIGHT }, () => Array(GRID_WIDTH).fill(0)),
@@ -228,9 +238,23 @@ const SinglePlayerGame = ({ user, roomData, onBack }) => {
             }
         }
 
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)'; ctx.lineWidth = 1;
-        for (let i = 0; i <= GRID_WIDTH; i++) { ctx.beginPath(); ctx.moveTo(i * BLOCK_SIZE, 0); ctx.lineTo(i * BLOCK_SIZE, GRID_HEIGHT * BLOCK_SIZE); ctx.stroke(); }
-        for (let i = 0; i <= GRID_HEIGHT; i++) { ctx.beginPath(); ctx.moveTo(0, i * BLOCK_SIZE); ctx.lineTo(GRID_WIDTH * BLOCK_SIZE, i * BLOCK_SIZE); ctx.stroke(); }
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
+        // Draw inner grid lines only to avoid edge compression
+        for (let i = 1; i < GRID_WIDTH; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * BLOCK_SIZE, 0);
+            ctx.lineTo(i * BLOCK_SIZE, GRID_HEIGHT * BLOCK_SIZE);
+            ctx.stroke();
+        }
+        for (let i = 1; i < GRID_HEIGHT; i++) {
+            ctx.beginPath();
+            ctx.moveTo(0, i * BLOCK_SIZE);
+            ctx.lineTo(GRID_WIDTH * BLOCK_SIZE, i * BLOCK_SIZE);
+            ctx.stroke();
+        }
+        ctx.restore();
 
         drawGrid(ctx, g.grid, g.level, g.clearingLines, g.clearingPhase, g.flashActive, g.flashFrameCounter);
 

@@ -223,9 +223,23 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
             }
         }
 
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)'; ctx.lineWidth = 1;
-        for (let i = 0; i <= GRID_WIDTH; i++) { ctx.beginPath(); ctx.moveTo(i * BLOCK_SIZE, 0); ctx.lineTo(i * BLOCK_SIZE, GRID_HEIGHT * BLOCK_SIZE); ctx.stroke(); }
-        for (let i = 0; i <= GRID_HEIGHT; i++) { ctx.beginPath(); ctx.moveTo(0, i * BLOCK_SIZE); ctx.lineTo(GRID_WIDTH * BLOCK_SIZE, i * BLOCK_SIZE); ctx.stroke(); }
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.lineWidth = 1;
+        // Draw inner grid lines only to avoid edge compression
+        for (let i = 1; i < GRID_WIDTH; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * BLOCK_SIZE, 0);
+            ctx.lineTo(i * BLOCK_SIZE, GRID_HEIGHT * BLOCK_SIZE);
+            ctx.stroke();
+        }
+        for (let i = 1; i < GRID_HEIGHT; i++) {
+            ctx.beginPath();
+            ctx.moveTo(0, i * BLOCK_SIZE);
+            ctx.lineTo(GRID_WIDTH * BLOCK_SIZE, i * BLOCK_SIZE);
+            ctx.stroke();
+        }
+        ctx.restore();
         drawGrid(ctx, data.grid, data.level, data.clearingLines, data.clearingPhase, data.flashActive, data.flashFrameCounter);
 
         if (!data.isGameOver && !data.flashActive && data.clearingPhase === -1 && data.blockType !== undefined && (data.startWait === undefined || data.startWait <= 0)) {
@@ -513,7 +527,19 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
             }, 1000);
         } else if (gameState === 'LOBBY' && lobbyCountdown === 0) {
             if (playerIndex === 0) {
-                const seeds = Array.from({ length: 1000 }, () => Math.floor(Math.random() * 1000));
+                const seeds = [];
+                let lastType = -1;
+                let repeatCount = 0;
+                for (let i = 0; i < 1000; i++) {
+                    let type;
+                    do {
+                        type = Math.floor(Math.random() * 7);
+                    } while (type === lastType && repeatCount >= 2);
+
+                    if (type === lastType) repeatCount++;
+                    else { lastType = type; repeatCount = 1; }
+                    seeds.push(type);
+                }
                 socket.emit('send_random_block', { room_num: roomData.roomNum, random_block: seeds });
             }
             setLobbyCountdown(-1);
@@ -928,6 +954,7 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
                     {/* Compact stats on the right of board */}
                     <div style={{ width: isLocal ? '105px' : '70px', display: 'flex', flexDirection: 'column', gap: isLocal ? '15px' : '5px', fontFamily: '"Press Start 2P"', color: 'white', fontSize: isLocal ? '0.8rem' : '0.5rem' }}>
                         <div>SCORE</div><div style={{ fontSize: isLocal ? '0.9rem' : '0.6rem' }}>{formatScore(data.score)}</div>
+                        <div>LINES</div><div>{String(data.lines).padStart(3, '0')}</div>
                         <div>NEXT</div>
                         <div style={{
                             height: isLocal ? '90px' : '54px',
