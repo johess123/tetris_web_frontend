@@ -263,23 +263,20 @@ const GameBoard = ({ user, roomData, onBack }) => {
                 }
             }
 
-            ctx.save();
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
             ctx.lineWidth = 1;
-            // Draw inner grid lines only to avoid edge compression
-            for (let i = 1; i < GRID_WIDTH; i++) {
+            for (let i = 0; i <= GRID_WIDTH; i++) {
                 ctx.beginPath();
                 ctx.moveTo(i * BLOCK_SIZE, 0);
                 ctx.lineTo(i * BLOCK_SIZE, GRID_HEIGHT * BLOCK_SIZE);
                 ctx.stroke();
             }
-            for (let i = 1; i < GRID_HEIGHT; i++) {
+            for (let i = 0; i <= GRID_HEIGHT; i++) {
                 ctx.beginPath();
                 ctx.moveTo(0, i * BLOCK_SIZE);
                 ctx.lineTo(GRID_WIDTH * BLOCK_SIZE, i * BLOCK_SIZE);
                 ctx.stroke();
             }
-            ctx.restore();
 
             drawGrid(ctx, g.grid, g.level, g.clearingLines, g.clearingPhase, g.flashActive, g.flashFrameCounter);
 
@@ -301,22 +298,20 @@ const GameBoard = ({ user, roomData, onBack }) => {
             oCtx.fillStyle = '#000'; oCtx.fillRect(0, 0, oCtx.canvas.width, oCtx.canvas.height);
 
             // Grid lines for opponent
-            oCtx.save();
             oCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
             oCtx.lineWidth = 1;
-            for (let i = 1; i < GRID_WIDTH; i++) {
+            for (let i = 0; i <= GRID_WIDTH; i++) {
                 oCtx.beginPath();
                 oCtx.moveTo(i * BLOCK_SIZE, 0);
                 oCtx.lineTo(i * BLOCK_SIZE, GRID_HEIGHT * BLOCK_SIZE);
                 oCtx.stroke();
             }
-            for (let i = 1; i < GRID_HEIGHT; i++) {
+            for (let i = 0; i <= GRID_HEIGHT; i++) {
                 oCtx.beginPath();
                 oCtx.moveTo(0, i * BLOCK_SIZE);
                 oCtx.lineTo(GRID_WIDTH * BLOCK_SIZE, i * BLOCK_SIZE);
                 oCtx.stroke();
             }
-            oCtx.restore();
 
             drawGrid(oCtx, opponentData.grid, opponentData.level);
 
@@ -784,14 +779,14 @@ const GameBoard = ({ user, roomData, onBack }) => {
                 </div>
                 <div className="board-center" style={{ textAlign: 'center' }}>
                     <div style={{ color: 'white', fontFamily: '"Press Start 2P"', fontSize: '1.5rem', marginBottom: '15px' }}>{name}</div>
-                    <div className="canvas-container" style={{ border: '4px solid #777', background: '#000' }}><canvas ref={canvas} width={BLOCK_SIZE * GRID_WIDTH} height={BLOCK_SIZE * GRID_HEIGHT} /></div>
+                    <div className="canvas-container" style={{ border: '4px solid #777', background: '#000', boxSizing: 'content-box', width: BLOCK_SIZE * GRID_WIDTH, height: BLOCK_SIZE * GRID_HEIGHT, padding: 0 }}><canvas ref={canvas} width={BLOCK_SIZE * GRID_WIDTH} height={BLOCK_SIZE * GRID_HEIGHT} /></div>
                 </div>
                 <div className="right-stats" style={{ width: '160px', display: 'flex', flexDirection: 'column', gap: '30px', fontFamily: '"Press Start 2P"', color: 'white' }}>
                     <div className="stat-group"><div style={{ fontSize: '1rem', marginBottom: '10px' }}>SCORE</div><div style={{ fontSize: '1.4rem' }}>{String(stats.score).padStart(6, '0')}</div></div>
                     <div className="stat-group"><div style={{ fontSize: '1rem', marginBottom: '10px' }}>LINES</div><div style={{ fontSize: '1.4rem' }}>{String(stats.lines).padStart(3, '0')}</div></div>
                     <div className="stat-group">
                         <div style={{ fontSize: '1rem', marginBottom: '10px' }}>NEXT</div>
-                        <div style={{ height: '90px', width: '120px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><canvas ref={nextCanvas} width="120" height="90" /></div>
+                        <div style={{ height: '90px', width: '120px', display: 'flex', justifyContent: 'center', alignItems: 'center', border: '1px solid #333', background: '#000', boxSizing: 'content-box' }}><canvas ref={nextCanvas} width="120" height="90" /></div>
                     </div>
                     <div className="stat-group"><div style={{ fontSize: '1rem', marginBottom: '10px' }}>LEVEL</div><div style={{ fontSize: '1.4rem' }}>{String(stats.level).padStart(2, '0')}</div></div>
                     <div style={{ fontSize: '1rem', color: 'white', marginTop: '10px' }}>{stats.hz} HZ</div>

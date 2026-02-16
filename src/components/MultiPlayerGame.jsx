@@ -223,23 +223,20 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
             }
         }
 
-        ctx.save();
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
         ctx.lineWidth = 1;
-        // Draw inner grid lines only to avoid edge compression
-        for (let i = 1; i < GRID_WIDTH; i++) {
+        for (let i = 0; i <= GRID_WIDTH; i++) {
             ctx.beginPath();
             ctx.moveTo(i * BLOCK_SIZE, 0);
             ctx.lineTo(i * BLOCK_SIZE, GRID_HEIGHT * BLOCK_SIZE);
             ctx.stroke();
         }
-        for (let i = 1; i < GRID_HEIGHT; i++) {
+        for (let i = 0; i <= GRID_HEIGHT; i++) {
             ctx.beginPath();
             ctx.moveTo(0, i * BLOCK_SIZE);
             ctx.lineTo(GRID_WIDTH * BLOCK_SIZE, i * BLOCK_SIZE);
             ctx.stroke();
         }
-        ctx.restore();
         drawGrid(ctx, data.grid, data.level, data.clearingLines, data.clearingPhase, data.flashActive, data.flashFrameCounter);
 
         if (!data.isGameOver && !data.flashActive && data.clearingPhase === -1 && data.blockType !== undefined && (data.startWait === undefined || data.startWait <= 0)) {
@@ -934,7 +931,7 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
                         border: isLocal ? '4px solid #777' : '2px solid #555',
                         background: '#000',
                         position: 'relative',
-                        overflow: 'hidden',
+                        boxSizing: 'content-box',
                         padding: 0
                     }}>
                         <canvas
@@ -963,7 +960,8 @@ const MultiPlayerGame = ({ user, roomData, onBack }) => {
                             justifyContent: 'center',
                             alignItems: 'center',
                             border: '1px solid #333',
-                            background: '#000'
+                            background: '#000',
+                            boxSizing: 'content-box'
                         }}>
                             <canvas
                                 ref={nextCanvas}
